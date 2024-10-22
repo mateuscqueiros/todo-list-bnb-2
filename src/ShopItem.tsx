@@ -1,5 +1,5 @@
 import { IconCheck, IconEdit, IconTrash } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export interface ShopItemType {
   id: number;
@@ -8,17 +8,29 @@ export interface ShopItemType {
 
 export interface ShopItemProps {
   item: ShopItemType;
+  onEdit?: (value: ShopItemType) => void;
   onDelete?: (value: ShopItemType['id']) => void;
 }
 
-export function ShopItem({ item, onDelete }: ShopItemProps) {
+export function ShopItem({ item, onDelete, onEdit }: ShopItemProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  function handleEdit() {
+    setIsEditing(false);
+    const titleInput = titleInputRef.current?.value;
+    if (titleInput) {
+      onEdit && onEdit({ id: item.id, title: titleInput });
+    }
+  }
 
   return (
-    <div className="shop-item">
+    <li className="shop-item">
       <div>
         {!isEditing && <span>{item.title}</span>}
-        {isEditing && <input type="text" defaultValue={item.title} />}
+        {isEditing && (
+          <input ref={titleInputRef} type="text" defaultValue={item.title} />
+        )}
       </div>
       <div className="item-actions">
         {!isEditing && (
@@ -29,10 +41,10 @@ export function ShopItem({ item, onDelete }: ShopItemProps) {
         )}
         {isEditing && (
           <div className="edit-actions">
-            <IconCheck />
+            <IconCheck onClick={handleEdit} />
           </div>
         )}
       </div>
-    </div>
+    </li>
   );
 }
